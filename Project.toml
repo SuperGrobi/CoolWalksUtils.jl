@@ -1,0 +1,13 @@
+name = "CoolWalkUtils"
+uuid = "5abba2a6-77e2-4331-9785-93f3fa89e9c9"
+authors = ["Henrik Wolf <henrik-wolf@freenet.de> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.8"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
