@@ -1,16 +1,16 @@
-using CoolWalkUtils
+using CoolWalksUtils
 using Documenter
 
-DocMeta.setdocmeta!(CoolWalkUtils, :DocTestSetup, :(using CoolWalkUtils); recursive=true)
+DocMeta.setdocmeta!(CoolWalksUtils, :DocTestSetup, :(using CoolWalksUtils); recursive=true)
 
 makedocs(;
-    modules=[CoolWalkUtils],
+    modules=[CoolWalksUtils],
     authors="Henrik Wolf <henrik-wolf@freenet.de> and contributors",
-    repo="https://github.com/SuperGrobi/CoolWalkUtils.jl/blob/{commit}{path}#{line}",
-    sitename="CoolWalkUtils.jl",
+    repo="https://github.com/SuperGrobi/CoolWalksUtils.jl/blob/{commit}{path}#{line}",
+    sitename="CoolWalksUtils.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://SuperGrobi.github.io/CoolWalkUtils.jl",
+        canonical="https://SuperGrobi.github.io/CoolWalksUtils.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -20,6 +20,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/SuperGrobi/CoolWalkUtils.jl",
+    repo="github.com/SuperGrobi/CoolWalksUtils.jl",
     devbranch="main",
 )

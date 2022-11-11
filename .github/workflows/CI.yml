@@ -50,6 +50,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using CoolWalkUtils
-            DocMeta.setdocmeta!(CoolWalkUtils, :DocTestSetup, :(using CoolWalkUtils); recursive=true)
-            doctest(CoolWalkUtils)'
+            using CoolWalksUtils
+            DocMeta.setdocmeta!(CoolWalksUtils, :DocTestSetup, :(using CoolWalksUtils); recursive=true)
+            doctest(CoolWalksUtils)'

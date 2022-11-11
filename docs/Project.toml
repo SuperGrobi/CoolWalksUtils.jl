@@ -1,3 +1,3 @@
 [deps]
-CoolWalkUtils = "5abba2a6-77e2-4331-9785-93f3fa89e9c9"
+CoolWalksUtils = "5abba2a6-77e2-4331-9785-93f3fa89e9c9"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"

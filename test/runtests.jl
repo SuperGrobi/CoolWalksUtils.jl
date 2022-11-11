@@ -1,6 +1,6 @@
-using CoolWalkUtils
+using CoolWalksUtils
 using Test
 
-@testset "CoolWalkUtils.jl" begin
+@testset "CoolWalksUtils.jl" begin
     # Write your tests here.
 end

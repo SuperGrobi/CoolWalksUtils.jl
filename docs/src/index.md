@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = CoolWalkUtils
+CurrentModule = CoolWalksUtils
 ```
 
-# CoolWalkUtils
+# CoolWalksUtils
 
-Documentation for [CoolWalkUtils](https://github.com/SuperGrobi/CoolWalkUtils.jl).
+Documentation for [CoolWalksUtils](https://github.com/SuperGrobi/CoolWalksUtils.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [CoolWalkUtils]
+Modules = [CoolWalksUtils]
 ```
