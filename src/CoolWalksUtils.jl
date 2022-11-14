@@ -14,15 +14,21 @@ module CoolWalksUtils
         nothing
     end
 
-    """
+    #=
         toWKT(geom::ArchGDAL.AbstractPreparedGeometry)
     
     temporary function to prevent segfault when trying to print prepared geometry
-    """
+    =#
     ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
 
     export OSM_ref
 
     export sunposition
     include("SunPosition.jl")
+
+    export project_local!, 
+           project_back!,
+           reinterp_crs!,
+           apply_wsg_84!
+    include("Projection.jl")
 end

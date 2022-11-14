@@ -7,3 +7,4 @@ using Test
 end
 
 include("SunPosition.jl")
+include("Projection.jl")

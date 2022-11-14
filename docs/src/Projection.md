@@ -11,3 +11,8 @@ Pages = ["Projection.md"]
 ```@docs
 OSM_ref
 ```
+
+```@autodocs
+Modules = [CoolWalksUtils]
+Pages = ["Projection.jl"]
+```
