@@ -3,6 +3,9 @@ uuid = "5abba2a6-77e2-4331-9785-93f3fa89e9c9"
 authors = ["Henrik Wolf <henrik-wolf@freenet.de> and contributors"]
 version = "0.1.0"
 
+[deps]
+ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
+
 [compat]
 julia = "1.8"
 
