@@ -12,29 +12,31 @@ we use only algorithm 1 and omit the inputs of TT-UT, pressure and temperature, 
 # Return
 Array with 3 entries [x,y,z], representing vector pointing towards sun in local, cartesian coordinate system, centered at longitude, latitude
 with x pointing east, y pointing north and z pointing up.
-"""
-function sunposition end
 
-"""
+---
+
     sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
 
 # Notes on Arguments
 - `date` is assumed to be in local time. 
 - `timezone` and `daylight_saving` are used to convert to gmt. If the time is allready gmt, set `timezone=0` and `daylight_saving=false`
-"""
-function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
-    u_date = date - Hour(timezone + daylight_saving)
-    t_2060 = date_from_2060(u_date)
-    return _sunposition(t_2060, longitude, latitude)
-end
 
-"""
+---
+
     sunposition(time, day::Int, month::Int, year::Int, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true) 
 
 # Notes on Arguments
 - `time` is local time in hours. Convert minutes and seconds... to fractions of hours. (13:30 becomes 13.5) range from 0 to 24.
 - `timezone` and `daylight_saving` are used to convert to gmt. If the time is allready gmt, set `timezone=0` and `daylight_saving=false`
 """
+function sunposition end
+
+function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
+    u_date = date - Hour(timezone + daylight_saving)
+    t_2060 = date_from_2060(u_date)
+    return _sunposition(t_2060, longitude, latitude)
+end
+
 function sunposition(time, day::Int, month::Int, year::Int, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
     ut = time - (timezone + daylight_saving)
     t_2060 = date_from_2060(ut, day, month, year)

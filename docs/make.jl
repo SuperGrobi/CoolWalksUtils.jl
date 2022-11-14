@@ -16,6 +16,8 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Sun Position" => "SunPosition.md",
+        "Projection" => "Projection.md"
     ],
 )
 
