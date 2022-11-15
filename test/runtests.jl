@@ -9,4 +9,4 @@ end
 
 include("SunPosition.jl")
 include("Projection.jl")
-include("BBox.jl")
+include("BoundingBox.jl")

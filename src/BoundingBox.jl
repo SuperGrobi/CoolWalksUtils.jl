@@ -13,16 +13,18 @@ function BoundingBox(minlon, minlat, maxlon, maxlat)
     return BoundingBoxType((minlon, minlat, maxlon, maxlat))
 end
 
-function BoundingBox(geo_colunm)
-    boxes = ArchGDAL.boundingbox.(geo_colunm)
+function BoundingBox(geo_array)
+    boxes = ArchGDAL.boundingbox.(geo_array)
     min_lat = Inf
     min_lon = Inf
     max_lat = -Inf
     max_lon = -Inf
     for box in boxes
-        for point in GeoInterface.getpoint(box)
-            lat = getcoord(point, 2)
-            lon = getcoord(point, 1)
+        line = ArchGDAL.getgeom(box, 0)
+        for i in 0:ArchGDAL.ngeom(line)-1
+            point = ArchGDAL.getgeom(line, i)
+            lat = ArchGDAL.gety(point, 0)
+            lon = ArchGDAL.getx(point, 0)
             min_lat > lat && (min_lat = lat)
             max_lat < lat && (max_lat = lat)
             min_lon > lon && (min_lon = lon)
