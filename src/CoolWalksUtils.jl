@@ -26,9 +26,12 @@ module CoolWalksUtils
     export sunposition
     include("SunPosition.jl")
 
-    export project_local!, 
+    export project_local!,
            project_back!,
            reinterp_crs!,
            apply_wsg_84!
     include("Projection.jl")
+
+    export BoundingBox, in_BoundingBox
+    include("BoundingBox.jl")
 end
