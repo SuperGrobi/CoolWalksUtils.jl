@@ -17,7 +17,8 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Sun Position" => "SunPosition.md",
-        "Projection" => "Projection.md"
+        "Projection" => "Projection.md",
+        "Bounding Box" => "BoundingBox.md"
     ],
 )
 
