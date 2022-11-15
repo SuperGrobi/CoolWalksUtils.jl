@@ -1,5 +1,6 @@
 using CoolWalksUtils
 using Dates
+using ArchGDAL
 using Test
 
 @testset "CoolWalksUtils.jl" begin
