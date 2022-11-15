@@ -27,7 +27,7 @@ with x pointing east, y pointing north and z pointing up.
 
 # Notes on Arguments
 - `time` is local time in hours. Convert minutes and seconds... to fractions of hours. (13:30 becomes 13.5) range from 0 to 24.
-- `timezone` and `daylight_saving` are used to convert to gmt. If the time is allready gmt, set `timezone=0` and `daylight_saving=false`
+- `timezone` and `daylight_saving` are used to convert to gmt. If the time is allready gmt, set `timezone=0` and `daylight_saving=false`.
 """
 function sunposition end
 
