@@ -18,7 +18,8 @@ makedocs(;
         "Home" => "index.md",
         "Sun Position" => "SunPosition.md",
         "Projection" => "Projection.md",
-        "Bounding Box" => "BoundingBox.md"
+        "Bounding Box" => "BoundingBox.md",
+        "Maths" => "Maths.md"
     ],
 )
 

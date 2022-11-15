@@ -34,4 +34,7 @@ module CoolWalksUtils
 
     export BoundingBox, in_BoundingBox
     include("BoundingBox.jl")
+
+    export unit, cross
+    include("Maths.jl")
 end
