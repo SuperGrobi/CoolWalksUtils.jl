@@ -12,6 +12,7 @@ macro rerun(number, code)
                 break
             catch e
                 if i>1 
+                    sleep(0.8)
                     println("running code failed, retrying at most $(i-1) times.")
                 else
                     rethrow(e)
