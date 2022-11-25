@@ -3,7 +3,9 @@
         rand() <= p ? throw(ArgumentError("this is a test error")) : "everything ran fine"
     end
 
-    @test_throws ErrorException @rerun 10 throwerror_prob(1)
-    @rerun 10 rand(5)
+    tries = 10
+
+    @test_throws ArgumentError @rerun tries throwerror_prob(1)
+    @rerun tries rand(5)
     @test true
 end

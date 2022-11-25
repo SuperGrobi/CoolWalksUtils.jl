@@ -6,14 +6,17 @@ runs the input `code` at most `number` times or until it does not throw an error
 """
 macro rerun(number, code)
     quote
-        for i in $number:-1:1
+        for i in $(esc(number)):-1:1
             try
-                num = $code
+                num = $(esc(code))
                 break
-            catch
-                println("running code failed, retrying at most $i times.")
+            catch e
+                if i>1 
+                    println("running code failed, retrying at most $(i-1) times.")
+                else
+                    rethrow(e)
+                end
             end
-            throw(ErrorException("the code did not run correctly once in $($number) tries."))
         end
     end
 end
