@@ -37,4 +37,7 @@ module CoolWalksUtils
 
     export unit, cross
     include("Maths.jl")
+
+    export @rerun
+    include("Testing.jl")
 end
