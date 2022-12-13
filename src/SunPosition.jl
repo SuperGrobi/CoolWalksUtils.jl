@@ -7,7 +7,7 @@ we use only algorithm 1 and omit the inputs of TT-UT, pressure and temperature, 
 
 # Notes on Arguments
 - `longitude` has to be in radians from 0 to 2π, starting from Greenwitch going east
-- `latitude` has to be in radians from -π to -π, starting from south pole, going north
+- `latitude` has to be in radians from -π/2 to -π/2, starting from south pole, going north
 
 # Return
 Array with 3 entries [x,y,z], representing vector pointing towards sun in local, cartesian coordinate system, centered at longitude, latitude
@@ -32,6 +32,12 @@ with x pointing east, y pointing north and z pointing up.
 function sunposition end
 
 function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
+    if !(0 <= longitude <= 2π)
+        throw(ArgumentError("longitude of $longitude not in range [0, 2π]"))
+    end
+    if !(-π/2 <= latitude <= π/2)
+        throw(ArgumentError("latitude of $latitude not in range [-π/2, π/2]"))
+    end
     u_date = date - Hour(timezone + daylight_saving)
     t_2060 = date_from_2060(u_date)
     return _sunposition(t_2060, longitude, latitude)
