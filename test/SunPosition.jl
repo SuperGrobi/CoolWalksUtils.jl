@@ -59,6 +59,10 @@
     @test pos6[1] < 0
     @test pos6[2] ≈ 0 atol = 0.01
     @test pos6[3] > 0
+    
+    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), 12, deg2rad(55))
+    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(12), 55)
+    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), 12, 55)
 
     # test if both options give the same result
     @test pos1 == pos4

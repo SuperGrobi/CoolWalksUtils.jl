@@ -46,6 +46,4 @@
     @test !in_BoundingBox(lon, lat, fourargs_bbox)
     @test in_BoundingBox(lon, lat, geom_bbox)
     @test in_BoundingBox(lon, lat, point_bbox)
-
-    @warn "no tests for bounding box yet implemented"
 end
