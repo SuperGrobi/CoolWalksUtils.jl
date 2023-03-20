@@ -32,7 +32,7 @@ module CoolWalksUtils
            apply_wsg_84!
     include("Projection.jl")
 
-    export BoundingBox, in_BoundingBox
+    export BoundingBox, in_BoundingBox, center_BoundingBox
     include("BoundingBox.jl")
 
     export unit, cross
