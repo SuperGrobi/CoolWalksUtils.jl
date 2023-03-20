@@ -62,6 +62,16 @@ function BoundingBox(lons, lats)
 end
 
 """
+
+    center_BoundingBox(bbox)
+
+returns the center of the bounding box
+"""
+function center_BoundingBox(bbox)
+    return (bbox.minlon + bbox.maxlon)/2, (bbox.minlat + bbox.maxlat)/2
+end
+
+"""
     in_BoundingBox(lon, lat, bbox::BoundingBoxType)
 
 tests whether the point given by `lon` and `lat` is in `bbox`.

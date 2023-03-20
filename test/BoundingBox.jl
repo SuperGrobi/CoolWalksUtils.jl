@@ -39,6 +39,12 @@
     @test point_bbox.maxlon == maximum(lons)
     @test point_bbox.maxlat == maximum(lats)
 
+    @test center_BoundingBox(basic_bbox) == (2.5, 1.2)
+    @test center_BoundingBox(unsorted_bbox) == (5.2, 4.3)
+    @test center_BoundingBox(fourargs_bbox) == (5.25, 4.3)
+    @test center_BoundingBox(geom_bbox) == (1.75, 1.2)
+    @test center_BoundingBox(point_bbox) == (4.75, 4.65)
+
     lon = 0.4
     lat = 1.5
     @test !in_BoundingBox(lon, lat, basic_bbox)
