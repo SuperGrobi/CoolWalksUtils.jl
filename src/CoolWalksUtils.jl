@@ -1,43 +1,48 @@
 module CoolWalksUtils
 
-    using ArchGDAL
-    using Dates
+using ArchGDAL
+using Dates
+using SpatialIndexing
+using GeoInterface
 
-    """
-    Reference which holds the WSG84 (EPSG4326) `ArchGDAL` Spatial Reference System
-    with lon-lat order.
-    """
-    const OSM_ref = Ref{ArchGDAL.ISpatialRef}()
+"""
+Reference which holds the WSG84 (EPSG4326) `ArchGDAL` Spatial Reference System
+with lon-lat order.
+"""
+const OSM_ref = Ref{ArchGDAL.ISpatialRef}()
 
-    function __init__()
-        OSM_ref[] = ArchGDAL.importEPSG(4326; order=:trad)
-        nothing
-    end
+function __init__()
+    OSM_ref[] = ArchGDAL.importEPSG(4326; order=:trad)
+    nothing
+end
 
-    #=
-        toWKT(geom::ArchGDAL.AbstractPreparedGeometry)
-    
-    temporary function to prevent segfault when trying to print prepared geometry
-    =#
-    ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
+#=
+    toWKT(geom::ArchGDAL.AbstractPreparedGeometry)
 
-    export OSM_ref
+temporary function to prevent segfault when trying to print prepared geometry
+=#
+ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
 
-    export sunposition
-    include("SunPosition.jl")
+export OSM_ref
 
-    export project_local!,
-           project_back!,
-           reinterp_crs!,
-           apply_wsg_84!
-    include("Projection.jl")
+export sunposition
+include("SunPosition.jl")
 
-    export BoundingBox, in_BoundingBox, center_BoundingBox
-    include("BoundingBox.jl")
+export project_local!,
+    project_back!,
+    reinterp_crs!,
+    apply_wsg_84!
+include("Projection.jl")
 
-    export unit, cross
-    include("Maths.jl")
+export BoundingBox, in_BoundingBox, center_BoundingBox
+include("BoundingBox.jl")
 
-    export @rerun
-    include("Testing.jl")
+export unit, cross
+include("Maths.jl")
+
+export build_rtree, rect_from_geom
+include("RTreeBuilding.jl")
+
+export @rerun
+include("Testing.jl")
 end

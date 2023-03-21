@@ -12,7 +12,7 @@ makedocs(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://SuperGrobi.github.io/CoolWalksUtils.jl",
         edit_link="main",
-        assets=String[],
+        assets=String[]
     ),
     pages=[
         "Home" => "index.md",
@@ -20,11 +20,12 @@ makedocs(;
         "Projection" => "Projection.md",
         "Bounding Box" => "BoundingBox.md",
         "Maths" => "Maths.md",
+        "RTrees" => "RTreeBuilding.md"
         "Testing" => "Testing.md"
-    ],
+    ]
 )
 
 deploydocs(;
     repo="github.com/SuperGrobi/CoolWalksUtils.jl",
-    devbranch="main",
+    devbranch="main"
 )
