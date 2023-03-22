@@ -40,7 +40,7 @@ include("BoundingBox.jl")
 export unit, cross
 include("Maths.jl")
 
-export build_rtree, rect_from_geom
+export build_rtree, rect_from_geom, build_point_rtree
 include("RTreeBuilding.jl")
 
 export @rerun
