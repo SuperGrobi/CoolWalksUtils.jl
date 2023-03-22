@@ -41,7 +41,7 @@ end
     @test_throws TypeError build_rtree([ArchGDAL.createlinestring([0.0, 1.5, 0.6], [1.4, 3.5, 9.8])])
 end
 
-@testset "point rtree building" begin
+@testset "build_point_rtree" begin
     x = [10, 0, 8, 4, 0, 5, 7, 7, 5, 5] .|> Float64
     y = [8, 0, 10, 4, 5, 3, 1, 2, 9, 2] .|> Float64
     points = ArchGDAL.createpoint.(x, y)
