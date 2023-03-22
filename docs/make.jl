@@ -20,7 +20,7 @@ makedocs(;
         "Projection" => "Projection.md",
         "Bounding Box" => "BoundingBox.md",
         "Maths" => "Maths.md",
-        "RTrees" => "RTreeBuilding.md"
+        "RTrees" => "RTreeBuilding.md",
         "Testing" => "Testing.md"
     ]
 )
