@@ -29,6 +29,23 @@ function build_rtree(geo_arr)
     return rt
 end
 
+"""
+
+    build_rtree(df::DataFrame)
+
+builds `SpatialIndexing.RTree{Float64, 2}` from a `DataFrame` containing at least a column named `geometry`. The value of an entry in the RTree is a named tuple with:
+`(prep=prepared_geometry, row=dataframe_row)`. `prep` is the prepared geometry, derived from `row.geometry` and can be used in a few `ArchGDAL` functions to get higher
+performance, for example in intersection testing, because relevant values get precomputed and cashed in the prepared geometry, rather than precomputed on every test.
+The `row` entry is a reference to the row of the original dataframe, providing access to all relevant data.
+"""
+function build_rtree(df::DataFrame)
+    rt = RTree{Float64,2}(Int, NamedTuple{(:prep, :row),Tuple{ArchGDAL.IPreparedGeometry,DataFrames.DataFrameRow}})
+    for (i, r) in enumerate(eachrow(df))
+        bbox = rect_from_geom(r.geometry)
+        insert!(rt, bbox, i, (prep=ArchGDAL.preparegeom(r.geometry), row=r))
+    end
+    return rt
+end
 
 """
 
