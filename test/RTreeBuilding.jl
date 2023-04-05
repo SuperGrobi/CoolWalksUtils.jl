@@ -34,6 +34,11 @@ end
     @test tree isa RTree
     @test length(collect(contained_in(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6))))) == 2
     @test length(collect(intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6))))) == 4
+    for inter in intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6)))
+        @test haskey(inter.val, :prep)
+        @test haskey(inter.val, :orig)
+        @test length(inter.val) == 2
+    end
 
 
     @test_throws TypeError build_rtree([ArchGDAL.createpoint(1.2, 4.5)])
@@ -66,5 +71,9 @@ end
     @test length(collect(intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6))))) == 4
     for inter in intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6)))
         @test inter.val.row.info isa String
+        @test length(inter.val) == 3
+        @test haskey(inter.val, :orig)
+        @test haskey(inter.val, :prep)
+        @test haskey(inter.val, :row)
     end
 end

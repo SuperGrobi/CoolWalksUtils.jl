@@ -34,15 +34,17 @@ end
     build_rtree(df::DataFrame)
 
 builds `SpatialIndexing.RTree{Float64, 2}` from a `DataFrame` containing at least a column named `geometry`. The value of an entry in the RTree is a named tuple with:
-`(prep=prepared_geometry, row=dataframe_row)`. `prep` is the prepared geometry, derived from `row.geometry` and can be used in a few `ArchGDAL` functions to get higher
-performance, for example in intersection testing, because relevant values get precomputed and cashed in the prepared geometry, rather than precomputed on every test.
+`(orig=original_geometry, prep=prepared_geometry, row=dataframe_row)`. `orig` is the same geometry as in `row.geometry`, and `prep` is the prepared geometry, derived from `orig`.
+It can be used in a few `ArchGDAL` functions to get higher performance, for example in intersection testing, because relevant values get precomputed and
+cashed in the prepared geometry, rather than precomputed on every test. Note that only the first element in these tests can be a prepared geometry,
+for example `ArchGDAL.intersects(normal_geom, prepared_geom)` is a highway to segfault-town, where `ArchGDAL.intersects(prepared_geom, normal_geom)` is fine and great.
 The `row` entry is a reference to the row of the original dataframe, providing access to all relevant data.
 """
 function build_rtree(df::DataFrame)
-    rt = RTree{Float64,2}(Int, NamedTuple{(:prep, :row),Tuple{ArchGDAL.IPreparedGeometry,DataFrames.DataFrameRow}})
+    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep, :row),Tuple{ArchGDAL.IGeometry,ArchGDAL.IPreparedGeometry,DataFrames.DataFrameRow}})
     for (i, r) in enumerate(eachrow(df))
         bbox = rect_from_geom(r.geometry)
-        insert!(rt, bbox, i, (prep=ArchGDAL.preparegeom(r.geometry), row=r))
+        insert!(rt, bbox, i, (orig=r.geometry, prep=ArchGDAL.preparegeom(r.geometry), row=r))
     end
     return rt
 end
