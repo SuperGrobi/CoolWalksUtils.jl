@@ -64,4 +64,25 @@
     @test ArchGDAL.getx(line2, 1) == 1.0
     @test ArchGDAL.gety(line2, 1) == 1.0
 
+    df = DataFrame(points=pointlist, lines=linelist, info=["row 1", "row 2"])
+    df_local = project_local!(df, 1, 1)
+    @test df_local == df
+    for geom in df.points
+        @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
+    end
+    for geom in df.lines
+        @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
+    end
+    df_global = project_back!(df)
+    @test df_global == df
+
+    metadata!(df, "center_lon", 1.3)
+    metadata!(df, "center_lat", 1.5)
+    df_local = project_local!(df)
+    for geom in df.points
+        @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1.5 +lon_0=1.3")
+    end
+    for geom in df.lines
+        @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1.5 +lon_0=1.3")
+    end
 end
