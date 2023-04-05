@@ -4,6 +4,7 @@ using ArchGDAL
 using Dates
 using SpatialIndexing
 using GeoInterface
+using DataFrames
 
 """
 Reference which holds the WSG84 (EPSG4326) `ArchGDAL` Spatial Reference System
