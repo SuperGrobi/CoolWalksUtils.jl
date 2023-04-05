@@ -2,6 +2,7 @@ using CoolWalksUtils
 using Dates
 using ArchGDAL
 using Test
+using DataFrames
 using SpatialIndexing
 
 include("SunPosition.jl")

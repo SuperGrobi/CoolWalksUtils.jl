@@ -52,3 +52,19 @@ end
     @test length(collect(contained_in(tree, SpatialIndexing.Rect((2.5, 0.2), (7.5, 4.8))))) == 5
     @test length(collect(intersects_with(tree, rect_from_geom(points[10], buffer=2.1)))) == 5
 end
+
+@testset "build_rtree from dataframe" begin
+    function triangle(x, y, w, h)
+        return ArchGDAL.createpolygon([x, x + w, x + 0.3w, x], [y, y, y + h, y])
+    end
+
+    trigs = [triangle(i...) for i in zip([0, 1, 3, 7, 6], [0.2, 4.9, 5, 1], [1, 3, 5.2, 0.4, 1.0], [0.4, 7, 3.2, 1, 9.1])]
+    df = DataFrame(geometry=trigs, info=ArchGDAL.toWKT.(ArchGDAL.centroid.(trigs)))
+    tree = build_rtree(df)
+    @test tree isa RTree
+    @test length(collect(contained_in(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6))))) == 2
+    @test length(collect(intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6))))) == 4
+    for inter in intersects_with(tree, SpatialIndexing.Rect((0.4, 0.2), (9.3, 10.6)))
+        @test inter.val.row.info isa String
+    end
+end
