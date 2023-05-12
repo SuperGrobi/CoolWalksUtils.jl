@@ -59,8 +59,7 @@
     @test pos6[1] < 0
     @test pos6[2] ≈ 0 atol = 0.01
     @test pos6[3] > 0
-    
-    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), 12, deg2rad(55))
+
     @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(12), 55)
     @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), 12, 55)
 
@@ -68,4 +67,15 @@
     @test pos1 == pos4
     @test pos2 == pos5
     @test pos3 == pos6
+
+    pos7 = sunposition(7.5, 5, 9, 2022, deg2rad(-100), deg2rad(55))
+    pos8 = sunposition(DateTime(2022, 9, 5, 7, 30), deg2rad(260), deg2rad(55))
+    @test pos7 ≈ pos8
+
+    pos9 = sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(-120), deg2rad(55))
+    pos10 = sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(240), deg2rad(55))
+    @test pos9 ≈ pos10
+
+    @test sunposition(DateTime(2022, 9, 5, 7, 30), deg2rad(12), deg2rad(55)) == sunposition_deg(DateTime(2022, 9, 5, 7, 30), 12, 55)
+    @test sunposition(DateTime(2022, 9, 7, 9, 35), deg2rad(-43), deg2rad(55)) == sunposition_deg(DateTime(2022, 9, 7, 9, 35), -43, 55)
 end

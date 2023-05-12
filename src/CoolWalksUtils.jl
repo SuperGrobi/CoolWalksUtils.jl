@@ -26,7 +26,7 @@ ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
 
 export OSM_ref
 
-export sunposition
+export sunposition, sunposition_deg, is_daylight_saving
 include("SunPosition.jl")
 
 export project_local!,
@@ -46,4 +46,8 @@ include("RTreeBuilding.jl")
 
 export @rerun
 include("Testing.jl")
+
+# TODO: convex hull for dataframes and graphs
+# TODO: polygon to coordstring?
+# TODO: spatial dataset-intersections
 end
