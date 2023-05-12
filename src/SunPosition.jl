@@ -1,3 +1,9 @@
+"""
+
+    is_daylight_saving(day::TimeType)
+    
+returns true if day is between 26/3/ and 29/10/, false otherwise.
+"""
 is_daylight_saving(day::TimeType) = Date(year(day), 3, 26) < day < Date(year(day), 10, 29)
 
 """
