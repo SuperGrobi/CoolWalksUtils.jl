@@ -1,3 +1,5 @@
+is_daylight_saving(day::TimeType) = Date(year(day), 3, 26) < day < Date(year(day), 10, 29)
+
 """
 Functions to calculate the sun position, adapted from
 `Roberto Grena (2012), Five new algorithms for the computation of sun position
@@ -6,8 +8,8 @@ from 2010 to 2110, Solar Energy, 86(5):1323–1337, doi:10.1016/j.solener.2012.0
 we use only algorithm 1 and omit the inputs of TT-UT, pressure and temperature, since we do not need the precision to launch satellites
 
 # Notes on Arguments
-- `longitude` has to be in radians from 0 to 2π, starting from Greenwitch going east
-- `latitude` has to be in radians from -π/2 to -π/2, starting from south pole, going north
+- `longitude` has to be in radians, centered at Greenwitch, positive values going east, negative west.
+- `latitude` has to be in radians from -π/2 to π/2, starting from south pole, going north
 
 # Return
 Array with 3 entries [x,y,z], representing vector pointing towards sun in local, cartesian coordinate system, centered at longitude, latitude
@@ -15,7 +17,7 @@ with x pointing east, y pointing north and z pointing up.
 
 ---
 
-    sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
+    sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=is_daylight_saving(date))
 
 # Notes on Arguments
 - `date` is assumed to be in local time. 
@@ -31,11 +33,8 @@ with x pointing east, y pointing north and z pointing up.
 """
 function sunposition end
 
-function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
-    if !(0 <= longitude <= 2π)
-        throw(ArgumentError("longitude of $longitude not in range [0, 2π]"))
-    end
-    if !(-π/2 <= latitude <= π/2)
+function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, daylight_saving::Bool=is_daylight_saving(date))
+    if !(-π / 2 <= latitude <= π / 2)
         throw(ArgumentError("latitude of $latitude not in range [-π/2, π/2]"))
     end
     u_date = date - Hour(timezone + daylight_saving)
@@ -44,10 +43,30 @@ function sunposition(date::DateTime, longitude, latitude, timezone::Int=1, dayli
 end
 
 function sunposition(time, day::Int, month::Int, year::Int, longitude, latitude, timezone::Int=1, daylight_saving::Bool=true)
+    if !(-π / 2 <= latitude <= π / 2)
+        throw(ArgumentError("latitude of $latitude not in range [-π/2, π/2]"))
+    end
     ut = time - (timezone + daylight_saving)
     t_2060 = date_from_2060(ut, day, month, year)
     return _sunposition(t_2060, longitude, latitude)
 end
+
+"""
+
+    sunposition_deg(date::DateTime, longitude, latitude, args...)
+
+same as `sunposition(date, ...)`, but takes the `longitude` and `latitude` in degrees.
+"""
+function sunposition_deg(date::DateTime, longitude, latitude, args...)
+    if !(-90 <= latitude <= 90)
+        throw(ArgumentError("latitude of $latitude not in range [-90, 90]"))
+    end
+    lon = deg2rad(longitude)
+    lat = deg2rad(latitude)
+    return sunposition(date, lon, lat, args...)
+end
+
+
 
 function _sunposition(t_2060, longitude, latitude)
     right_ascension, declination, hour_angle = algorithm_1(t_2060, longitude)
@@ -96,11 +115,11 @@ function algorithm_1(t_2060, longitude)
     c2 = (c1 + s1) * (c1 - s1)
 
     right_ascension = -1.38880 + 1.72027920e-2 * t_2060 +
-                        3.199e-2 * s1 - 2.65e-3 * c1 +
-                        4.050e-2 * s2 + 1.525e-2 * c2
+                      3.199e-2 * s1 - 2.65e-3 * c1 +
+                      4.050e-2 * s2 + 1.525e-2 * c2
     right_ascension = mod(right_ascension, 2π)
     declination = 6.57e-3 + 7.347e-2 * s1 - 3.9919e-1 * c1 +
-                    7.3e-4 * s2 - 6.60e-3 * c2
+                  7.3e-4 * s2 - 6.60e-3 * c2
     hour_angle = 1.75283 + 6.3003881 * t_2060 + longitude - right_ascension
     hour_angle = mod(hour_angle + π, 2π) - π
     return right_ascension, declination, hour_angle
