@@ -16,6 +16,10 @@
         @test true
     end
 
+    # empty list is trivially transformed
+    @test project_local!([], 1, 1) == []
+    @test project_back!([]) == []
+
     # test application of wsg84 (and apply wsg84)
     for geom in geomlist
         # check if crs is NULL
@@ -85,4 +89,9 @@
     for geom in df.lines
         @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1.5 +lon_0=1.3")
     end
+
+    # empty dataframe ist trivially transformed
+    df = DataFrame(:geometry => [], :id => [], :height => [])
+    @test project_local!(df, 1, 1) == df
+    @test project_back!(df) == df
 end
