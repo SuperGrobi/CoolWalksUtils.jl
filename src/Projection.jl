@@ -5,10 +5,12 @@ projects iterable of `ArchGDAL.jl` geometries from the coordinate system of `fir
 to the `transverse mercator` projection centered at `center_lon`, `center_lat`. Returns the projected `geo_array`.
 """
 function project_local!(geo_array, center_lon, center_lat)
-    projstring = "+proj=tmerc +lon_0=$center_lon +lat_0=$center_lat"
-    src = ArchGDAL.getspatialref(first(geo_array))
-    dest = ArchGDAL.importPROJ4(projstring)
-    ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, dest)
+    if length(geo_array) > 0
+        projstring = "+proj=tmerc +lon_0=$center_lon +lat_0=$center_lat"
+        src = ArchGDAL.getspatialref(first(geo_array))
+        dest = ArchGDAL.importPROJ4(projstring)
+        ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, dest)
+    end
     return geo_array
 end
 
@@ -20,9 +22,11 @@ projects each colum of `df` where the first entry is `GeoInterface.geometry()` t
 centered at `center_lon`, `center_lat`. Returns the projected `df`.
 """
 function project_local!(df::DataFrame, center_lon=metadata(df, "center_lon"), center_lat=metadata(df, "center_lat"))
-    for c in eachcol(df)
-        if isgeometry(first(c))
-            project_local!(c, center_lon, center_lat)
+    if nrow(df) > 0
+        for c in eachcol(df)
+            if isgeometry(first(c))
+                project_local!(c, center_lon, center_lat)
+            end
         end
     end
     return df
@@ -35,8 +39,10 @@ projects iterable of `ArchGDAL.jl` geometries from the coordinate system of `fir
 to the coordinate reference system given in `OSM_ref` (`EPSG4326`). Returns the projected `geo_array`.
 """
 function project_back!(geo_array)
-    src = ArchGDAL.getspatialref(first(geo_array))
-    ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, OSM_ref[])
+    if length(geo_array) > 0
+        src = ArchGDAL.getspatialref(first(geo_array))
+        ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, OSM_ref[])
+    end
     return geo_array
 end
 
@@ -47,9 +53,11 @@ end
 projects each column of `df` where the first entry is `GeoInterface.geometry()` back to `OSM_ref[]`. Return the `df`.
 """
 function project_back!(df::DataFrame)
-    for c in eachcol(df)
-        if isgeometry(first(c))
-            project_back!(c)
+    if nrow(df) > 0
+        for c in eachcol(df)
+            if isgeometry(first(c))
+                project_back!(c)
+            end
         end
     end
     return df
