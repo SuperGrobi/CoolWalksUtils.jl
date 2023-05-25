@@ -38,7 +38,7 @@ include("Projection.jl")
 export BoundingBox, in_BoundingBox, center_BoundingBox
 include("BoundingBox.jl")
 
-export unit, cross
+export unit, cross, is_ccw, intersection_distance, switches_side, is_convex
 include("Maths.jl")
 
 export build_rtree, rect_from_geom, build_point_rtree
