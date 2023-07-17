@@ -43,3 +43,23 @@ function is_convex(points)
     end
     return true
 end
+
+"""
+
+    is_left(center_point, test_point, sunpos::AbstractArray)
+    is_left(center_point::AbstractArray, test_point::AbstractArray, sunpos::AbstractArray)
+
+checks if `test_point` is left of the line going through `center_point` in the direction of `-sunpos`.
+(`sunpos` points AT the sun.)
+"""
+function is_left(center_point, test_point, sunpos::AbstractArray)
+    center_point = [collect(getcoord(center_point)); 0]
+    test_point = [collect(getcoord(test_point)); 0]
+    return is_left(center_point, test_point, sunpos)
+end
+function is_left(center_point::AbstractArray, test_point::AbstractArray, sunpos::AbstractArray)
+    direction = -sunpos
+    direction[end] = 0.0
+
+    CoolWalksUtils.cross(test_point - center_point, direction)[end] > 0
+end
