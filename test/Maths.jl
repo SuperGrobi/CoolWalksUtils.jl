@@ -1,4 +1,4 @@
-@testset "Maths" begin
+@testitem "Maths" begin
     v1 = [1, 1, 1]
     v2 = [1, -1, 0]
     v3 = [1, 0, -1]

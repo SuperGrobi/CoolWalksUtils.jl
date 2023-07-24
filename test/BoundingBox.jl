@@ -1,4 +1,5 @@
-@testset "Bounding Box" begin
+@testitem "Bounding Box" begin
+    using ArchGDAL
 
     basic_bbox = CoolWalksUtils.BoundingBoxType((0.0, 1.0, 5.0, 1.4))
     @test basic_bbox.minlon == 0.0

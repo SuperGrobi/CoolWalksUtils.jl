@@ -1,4 +1,5 @@
-@testset "rect_from_geom" begin
+@testitem "rect_from_geom" begin
+    using ArchGDAL
     pointrect = CoolWalksUtils.rect_from_geom(ArchGDAL.createpoint(1.0, 1.0))
     @test pointrect.low == (1.0, 1.0)
     @test pointrect.high == (1.0, 1.0)
@@ -24,7 +25,8 @@
     @test polyrect.high == (2.2, 2.4)
 end
 
-@testset "build_rtree" begin
+@testitem "build_rtree" begin
+    using ArchGDAL, SpatialIndexing
     function triangle(x, y, w, h)
         return ArchGDAL.createpolygon([x, x + w, x + 0.3w, x], [y, y, y + h, y])
     end
@@ -41,12 +43,13 @@ end
     end
 
 
-    @test_throws TypeError build_rtree([ArchGDAL.createpoint(1.2, 4.5)])
-    @test_throws TypeError build_rtree([ArchGDAL.createpoint(1.2, 4.5), ArchGDAL.createlinestring([0.0, 1.5, 0.6], [1.4, 3.5, 9.8])])
-    @test_throws TypeError build_rtree([ArchGDAL.createlinestring([0.0, 1.5, 0.6], [1.4, 3.5, 9.8])])
+    @test_throws MethodError build_rtree([ArchGDAL.createpoint(1.2, 4.5)])
+    @test_throws MethodError build_rtree([ArchGDAL.createpoint(1.2, 4.5), ArchGDAL.createlinestring([0.0, 1.5, 0.6], [1.4, 3.5, 9.8])])
+    @test_throws MethodError build_rtree([ArchGDAL.createlinestring([0.0, 1.5, 0.6], [1.4, 3.5, 9.8])])
 end
 
-@testset "build_point_rtree" begin
+@testitem "build_point_rtree" begin
+    using ArchGDAL, SpatialIndexing
     x = [10, 0, 8, 4, 0, 5, 7, 7, 5, 5] .|> Float64
     y = [8, 0, 10, 4, 5, 3, 1, 2, 9, 2] .|> Float64
     points = ArchGDAL.createpoint.(x, y)
@@ -58,7 +61,8 @@ end
     @test length(collect(intersects_with(tree, rect_from_geom(points[10], buffer=2.1)))) == 5
 end
 
-@testset "build_rtree from dataframe" begin
+@testitem "build_rtree from dataframe" begin
+    using DataFrames, ArchGDAL, SpatialIndexing
     function triangle(x, y, w, h)
         return ArchGDAL.createpolygon([x, x + w, x + 0.3w, x], [y, y, y + h, y])
     end

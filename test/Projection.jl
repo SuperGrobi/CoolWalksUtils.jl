@@ -1,4 +1,5 @@
-@testset "Projection" begin
+@testitem "Projection" begin
+    using ArchGDAL, DataFrames
     point1 = ArchGDAL.createpoint(1.0, 1.0)
     point2 = ArchGDAL.createpoint(3.5, 1.2)
     line1 = ArchGDAL.createlinestring([(0.0, 0.0), (1.0, 1.0), (2.0, 1.0)])

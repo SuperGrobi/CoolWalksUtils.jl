@@ -1,13 +1,4 @@
-using CoolWalksUtils
-using Dates
-using ArchGDAL
-using Test
-using DataFrames
-using SpatialIndexing
+using TestItemRunner
 
-include("SunPosition.jl")
-include("Projection.jl")
-include("BoundingBox.jl")
-include("Maths.jl")
-include("Testing.jl")
-include("RTreeBuilding.jl")
+@run_package_tests verbose = true
+

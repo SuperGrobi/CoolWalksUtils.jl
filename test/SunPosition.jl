@@ -1,4 +1,5 @@
-@testset "SunPosition" begin
+@testitem "SunPosition" begin
+    using Dates
     # test date calculation for general date
     @test CoolWalksUtils.date_from_2060(0, 1, 1, 2060) == 0.0
     @test CoolWalksUtils.date_from_2060(13.6, 5, 9, 2022) ≈ -13631.43 atol = 0.1
