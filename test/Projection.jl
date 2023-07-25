@@ -250,3 +250,62 @@ end
     @test geom_reinterp === geomlist
     @test contains(repr(ArchGDAL.getspatialref(geomlist[1])), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
 end
+
+@testitem "in local coordinates" begin
+    using ArchGDAL, DataFrames, TimeZones
+
+    point1 = ArchGDAL.createpoint(1.0, 1.0)
+    point2 = ArchGDAL.createpoint(3.5, 1.2)
+    line1 = ArchGDAL.createlinestring([(0.0, 0.0), (1.0, 1.0), (2.0, 1.0)])
+    line2 = ArchGDAL.createlinestring([(1.0, 0.0), (1.0, 1.0), (0.0, 2.4)])
+
+    pointlist = [point1, point2]
+    linelist = [line1, line2]
+    geomlist = [pointlist; linelist]
+    apply_wsg_84!(geomlist)
+
+    obs = ShadowObservatory("test observatory", 1, 1, tz"Europe/London")
+    df = DataFrame(points=ArchGDAL.clone.(pointlist), lines=ArchGDAL.clone.(linelist), info=["row 1", "row 2"])
+    metadata!(df, "observatory", obs, style=:note)
+
+    for geom in geomlist
+        @test repr(ArchGDAL.getspatialref(geom)) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
+    end
+
+    global_lengths = ArchGDAL.geomlength.(linelist)
+
+    local_results = in_local_coordinates(obs, df, pointlist, linelist) do df, pl, ll
+        for ls in [pl, ll, df.points, df.lines]
+            for geom in ls
+                @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
+            end
+        end
+        for (pl, ll) in ((pl, ll), (df.points, df.lines))
+            @test ArchGDAL.getx(pl[1], 0) == 0.0
+            @test ArchGDAL.gety(pl[1], 0) == 0.0
+
+            @test ArchGDAL.getx(ll[1], 1) == 0.0
+            @test ArchGDAL.gety(ll[1], 1) == 0.0
+
+            @test ArchGDAL.getx(ll[2], 1) == 0.0
+            @test ArchGDAL.gety(ll[2], 1) == 0.0
+        end
+        return ArchGDAL.geomlength.(ll)
+    end
+    for geom in geomlist
+        @test repr(ArchGDAL.getspatialref(geom)) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
+    end
+    for (pl, ll) in ((pointlist, linelist), (df.points, df.lines))
+        # check if (0.0, 0.0) => (1.0, 1.0)
+        @test ArchGDAL.getx(pl[1], 0) == 1.0
+        @test ArchGDAL.gety(pl[1], 0) == 1.0
+
+        @test ArchGDAL.getx(ll[1], 1) == 1.0
+        @test ArchGDAL.gety(ll[1], 1) == 1.0
+
+        @test ArchGDAL.getx(ll[2], 1) == 1.0
+        @test ArchGDAL.gety(ll[2], 1) == 1.0
+    end
+
+    @test all(local_results .> global_lengths)
+end

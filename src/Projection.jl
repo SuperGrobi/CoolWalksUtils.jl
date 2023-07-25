@@ -129,3 +129,26 @@ reinterp_crs!(geometry_container, crs) = _execute_projection!(geometry_container
 reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or `AbstractArray` of the same) to be in `WSG84`.
 """
 apply_wsg_84!(geometry_container) = reinterp_crs!(geometry_container, OSM_ref[])
+
+"""
+    in_local_coordinates(f, obs::ShadowObservatory, args...)
+    in_local_coordinates(f, df::DataFrame, args...)
+
+projects `args...` to local `crs` determined by `obs`, passes all `args...` to `f`, projects `args...` back to global `crs` and returns
+the return value of `f`.
+
+If a `DataFrame` is passed as the second entry, the `observatory` for local projection is taken from `metadata(df, "observatory")`.
+"""
+in_local_coordinates(f, df::DataFrame, args...) = in_local_coordinates(f, metadata(df, "observatory"), df, args...)
+function in_local_coordinates(f, obs::ShadowObservatory, args...)
+    for geom in args
+        project_local!(geom, obs)
+    end
+
+    ret_val = f(args...)
+
+    for geom in args
+        project_back!(geom)
+    end
+    return ret_val
+end

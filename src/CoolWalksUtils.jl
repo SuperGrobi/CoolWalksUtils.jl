@@ -34,7 +34,8 @@ include("SunPosition.jl")
 export project_local!,
     project_back!,
     reinterp_crs!,
-    apply_wsg_84!
+    apply_wsg_84!,
+    in_local_coordinates
 include("Projection.jl")
 
 export geoiter_extent, extent_center, extent_contains
