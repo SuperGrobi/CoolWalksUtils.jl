@@ -1,5 +1,7 @@
 module CoolWalksUtils
 
+using StatsBase
+
 using GeoInterface
 using Extents
 
@@ -34,7 +36,7 @@ export project_local!,
     apply_wsg_84!
 include("Projection.jl")
 
-export BoundingBox, in_BoundingBox, center_BoundingBox
+export geoiter_extent, extent_center, extent_contains
 include("BoundingBox.jl")
 
 export unit, cross, is_ccw, intersection_distance, switches_side, is_convex, is_left
@@ -46,7 +48,9 @@ include("RTreeBuilding.jl")
 export @rerun
 include("Testing.jl")
 
-# TODO: convex hull for dataframes and graphs
-# TODO: polygon to coordstring?
-# TODO: spatial dataset-intersections
+# TODO: Rework Extents
+# TODO: Rework Maths
+# TODO: Rework Projection
+# TODO: Rework RTreeBuilding
+# TODO: Rework Testing
 end

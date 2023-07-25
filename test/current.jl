@@ -28,3 +28,16 @@ t1 = DateTime(2023, 7, 25, 8, 16)
 t2 = DateTime(2023, 7, 25, 13, 18)
 t3 = DateTime(2023, 7, 25, 18, 22)
 CoolWalksUtils.local_sunpos(t3, obs; cartesian=true) * -1
+
+using Extents
+using GeoInterface
+using ArchGDAL
+
+using BenchmarkTools
+
+ps = [ArchGDAL.buffer(ArchGDAL.createpoint(rand(), rand()), 0.2) for i in 1:10]
+
+e1 = CoolWalksUtils.geoarray_extent()
+e2 = CoolWalksUtils.geoarray_extent(ps)
+
+CoolWalksUtils.extent_contains(e2, 1, 0.4)
