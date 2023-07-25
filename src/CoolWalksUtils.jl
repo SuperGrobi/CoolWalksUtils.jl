@@ -25,7 +25,7 @@ end
 
 export OSM_ref
 
-export sunposition, sunposition_deg, is_daylight_saving
+export local_sunpos, ShadowObservatory
 include("SunPosition.jl")
 
 export project_local!,

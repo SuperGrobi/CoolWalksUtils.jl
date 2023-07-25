@@ -1,82 +1,37 @@
 @testitem "SunPosition" begin
     using Dates
-    # test date calculation for general date
-    @test CoolWalksUtils.date_from_2060(0, 1, 1, 2060) == 0.0
-    @test CoolWalksUtils.date_from_2060(13.6, 5, 9, 2022) ≈ -13631.43 atol = 0.1
+    using TimeZones
 
-    # test date calculation for DateTime date
-    @test CoolWalksUtils.date_from_2060(DateTime(2060)) == 0.0
-    @test CoolWalksUtils.date_from_2060(DateTime(2022, 9, 5, 13, 36)) ≈ -13631.43 atol = 0.1
+    obs = CoolWalksUtils.ShadowObservatory("denmark", 12, 55, tz"Europe/Berlin")
 
+    t1 = DateTime(2022, 9, 5, 7, 31)
+    t2 = DateTime(2022, 9, 5, 13, 12)
+    t3 = DateTime(2022, 9, 5, 18, 53, 30)
 
-    # test algorithm for global position
-    alg1_test1 = CoolWalksUtils.algorithm_1(0.0, deg2rad(12))
-    alg1_test1_exp = (4.90698, -0.39921, -2.944716)
-    alg1_test2 = CoolWalksUtils.algorithm_1(-13631.43, deg2rad(12))
-    alg1_test2_exp = (2.868172, 0.1186921, 0.6547033)
-    for (i, j) in zip(alg1_test1, alg1_test1_exp)
-        @test i ≈ j atol = 1e-4
-    end
-    for (i, j) in zip(alg1_test2, alg1_test2_exp)
-        @test i ≈ j atol = 1e-4
-    end
-
-    # test algorithm for global to local position transformation
-    local_transform_test1 = CoolWalksUtils.get_local_sun_pos(deg2rad(55), alg1_test1[2], alg1_test1[3])
-    local_transform_test1_exp = (-0.9911949, -2.806291)
-    local_transform_test2 = CoolWalksUtils.get_local_sun_pos(deg2rad(55), alg1_test2[2], alg1_test2[3])
-    local_transform_test2_exp = (0.5808625, 0.8085391)
-    for (i, j) in zip(local_transform_test1, local_transform_test1_exp)
-        @test i ≈ j atol = 1e-4
-    end
-    for (i, j) in zip(local_transform_test2, local_transform_test2_exp)
-        @test i ≈ j atol = 1e-4
-    end
-
-    # test the full function for non date signature
-    pos1 = sunposition(7.5, 5, 9, 2022, deg2rad(12), deg2rad(55))
+    pos1 = local_sunpos(t1, obs)
     @test pos1[1] > 0
     @test pos1[2] ≈ 0 atol = 0.01
     @test pos1[3] > 0
-    pos2 = sunposition(13 + 1 / 6, 5, 9, 2022, deg2rad(12), deg2rad(55))
+
+    pos2 = local_sunpos(t2, obs)
     @test pos2[1] ≈ 0 atol = 0.01
     @test pos2[2] < 0
     @test pos2[3] > 0
-    pos3 = sunposition(18 + 53 / 60, 5, 9, 2022, deg2rad(12), deg2rad(55))
+
+    pos3 = local_sunpos(t3, obs)
     @test pos3[1] < 0
     @test pos3[2] ≈ 0 atol = 0.01
     @test pos3[3] > 0
 
-    # test the full function for DateTime signature
-    pos4 = sunposition(DateTime(2022, 9, 5, 7, 30), deg2rad(12), deg2rad(55))
+    pos1 = local_sunpos(t1, obs; cartesian=false)
     @test pos1[1] > 0
-    @test pos1[2] ≈ 0 atol = 0.01
-    @test pos1[3] > 0
-    pos5 = sunposition(DateTime(2022, 9, 5, 13, 10), deg2rad(12), deg2rad(55))
-    @test pos5[1] ≈ 0 atol = 0.01
-    @test pos5[2] < 0
-    @test pos5[3] > 0
-    pos6 = sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(12), deg2rad(55))
-    @test pos6[1] < 0
-    @test pos6[2] ≈ 0 atol = 0.01
-    @test pos6[3] > 0
+    @test pos1[2] ≈ 90 atol = 0.05
 
-    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(12), 55)
-    @test_throws ArgumentError sunposition(DateTime(2022, 9, 5, 18, 53), 12, 55)
+    pos2 = local_sunpos(t2, obs; cartesian=false)
+    @test pos2[1] > 0
+    @test pos2[2] ≈ 180 atol = 0.05
 
-    # test if both options give the same result
-    @test pos1 == pos4
-    @test pos2 == pos5
-    @test pos3 == pos6
-
-    pos7 = sunposition(7.5, 5, 9, 2022, deg2rad(-100), deg2rad(55))
-    pos8 = sunposition(DateTime(2022, 9, 5, 7, 30), deg2rad(260), deg2rad(55))
-    @test pos7 ≈ pos8
-
-    pos9 = sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(-120), deg2rad(55))
-    pos10 = sunposition(DateTime(2022, 9, 5, 18, 53), deg2rad(240), deg2rad(55))
-    @test pos9 ≈ pos10
-
-    @test sunposition(DateTime(2022, 9, 5, 7, 30), deg2rad(12), deg2rad(55)) == sunposition_deg(DateTime(2022, 9, 5, 7, 30), 12, 55)
-    @test sunposition(DateTime(2022, 9, 7, 9, 35), deg2rad(-43), deg2rad(55)) == sunposition_deg(DateTime(2022, 9, 7, 9, 35), -43, 55)
+    pos3 = local_sunpos(t3, obs; cartesian=false)
+    @test pos3[1] > 0
+    @test pos3[2] ≈ 270 atol = 0.05
 end
