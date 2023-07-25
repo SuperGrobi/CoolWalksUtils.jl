@@ -29,5 +29,5 @@ extent_contains(a::Extent, b::Extent)
 
 Checks if the extent `b` is fully contained in extent `a`.
 """
-extent_contains(a::Extent, X, Y) = extent_contains(a, geoarray_extent(X, Y))
+extent_contains(a::Extent, X, Y) = extent_contains(a, geoiter_extent(X, Y))
 extent_contains(a::Extent, b::Extent) = Extents.union(a, b) == a
