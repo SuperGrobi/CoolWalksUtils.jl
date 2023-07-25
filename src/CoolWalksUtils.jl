@@ -1,6 +1,7 @@
 module CoolWalksUtils
 
 using StatsBase
+using LinearAlgebra
 
 using GeoInterface
 using Extents
@@ -39,7 +40,7 @@ include("Projection.jl")
 export geoiter_extent, extent_center, extent_contains
 include("Extents.jl")
 
-export unit, cross, is_ccw, intersection_distance, switches_side, is_convex, is_left
+export is_ccw, intersection_distances, switches_side, is_convex, is_left
 include("Maths.jl")
 
 export build_rtree, rect_from_geom, build_point_rtree
@@ -48,8 +49,6 @@ include("RTreeBuilding.jl")
 export @rerun
 include("Testing.jl")
 
-# TODO: Rework Extents
-# TODO: Rework Maths
 # TODO: Rework Projection
 # TODO: Rework RTreeBuilding
 # TODO: Rework Testing
