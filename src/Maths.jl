@@ -58,7 +58,7 @@ end
 
 tests if the exterior of the `GeoInterface` compatible `polygon` is convex.
 
-    is_convex(points)
+    is_convex(points::AbstractVector)
 
 tests if vector of 2D points `points` describes a convex polygon.
 
@@ -76,7 +76,7 @@ julia> is_convex(thing)
 false
 ```
 """
-function is_convex(points::Vector)
+function is_convex(points::AbstractVector)
     # turning direction where polygon closes
     direction = is_ccw(points[end-1], points[1], points[2])
     for i in 1:length(points)-2
@@ -96,11 +96,11 @@ checks if `test_point` is left of the line going through `center_point` in the d
 
 # Signatures
 
-    is_left(center_point, test_point, sunpos::Vector)
+    is_left(center_point, test_point, sunpos::AbstractVector)
 
 `center_point` and `test_point` can be any `GeoInterface` compatible points.
 
-    is_left(center_point::Vector, test_point::Vector, sunpos::Vector)
+    is_left(center_point::AbstractVector, test_point::AbstractVector, sunpos::AbstractVector)
 
 `center_point` and `test_point` can be eiter 3 or 2 entry long vectors. In the later case, we add a third entry `==0`.
 
@@ -113,12 +113,12 @@ julia> is_left([0.5, 0.5, 0.0], [1, 1, 0.0], [1, 0, 0])
 false
 ```
 """
-function is_left(center_point, test_point, sunpos::Vector)
+function is_left(center_point, test_point, sunpos::AbstractVector)
     center_point = GeoInterface.coordinates(center_point)
     test_point = GeoInterface.coordinates(test_point)
     return is_left(center_point, test_point, sunpos)
 end
-function is_left(center_point::Vector, test_point::Vector, sunpos::Vector)
+function is_left(center_point::AbstractVector, test_point::AbstractVector, sunpos::AbstractVector)
     Δtest = test_point - center_point
 
     # pad last dimension
