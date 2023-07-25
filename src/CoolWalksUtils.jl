@@ -37,7 +37,7 @@ export project_local!,
 include("Projection.jl")
 
 export geoiter_extent, extent_center, extent_contains
-include("BoundingBox.jl")
+include("Extents.jl")
 
 export unit, cross, is_ccw, intersection_distance, switches_side, is_convex, is_left
 include("Maths.jl")
