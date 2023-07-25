@@ -1,4 +1,4 @@
-@testitem "SunPosition" begin
+@testitem "SunPosition cartesian" begin
     using Dates
     using TimeZones
 
@@ -22,6 +22,17 @@
     @test pos3[1] < 0
     @test pos3[2] ≈ 0 atol = 0.01
     @test pos3[3] > 0
+end
+
+@testitem "SunPosition altaz" begin
+    using Dates
+    using TimeZones
+
+    obs = CoolWalksUtils.ShadowObservatory("denmark", 12, 55, tz"Europe/Berlin")
+
+    t1 = DateTime(2022, 9, 5, 7, 31)
+    t2 = DateTime(2022, 9, 5, 13, 12)
+    t3 = DateTime(2022, 9, 5, 18, 53, 30)
 
     pos1 = local_sunpos(t1, obs; cartesian=false)
     @test pos1[1] > 0
