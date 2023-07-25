@@ -1,10 +1,16 @@
 module CoolWalksUtils
 
-using ArchGDAL
-using Dates
-using SpatialIndexing
 using GeoInterface
+using Extents
+
+using ArchGDAL
+using SpatialIndexing
 using DataFrames
+
+using AstroLib
+using Dates
+using TimeZones
+
 
 """
 Reference which holds the WSG84 (EPSG4326) `ArchGDAL` Spatial Reference System
@@ -16,13 +22,6 @@ function __init__()
     OSM_ref[] = ArchGDAL.importEPSG(4326; order=:trad)
     nothing
 end
-
-#=
-    toWKT(geom::ArchGDAL.AbstractPreparedGeometry)
-
-temporary function to prevent segfault when trying to print prepared geometry
-=#
-ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
 
 export OSM_ref
 
