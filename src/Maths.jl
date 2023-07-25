@@ -1,8 +1,7 @@
 """
-
     is_ccw(a, b, c)
 
-tests if the 2D points `a, b, c` are arranged counterclockwise.
+tests if the 2D points `a, b, c` form a counterclockwise triangle.
 
 ```jldoctest
 julia> is_ccw([0,0], [1,0], [1,1])
@@ -17,7 +16,6 @@ function is_ccw(a, b, c)
 end
 
 """
-
     switches_side(a, b, c, d)
 
 tests if the line defined by the 2D points `a, b` intersects the line segment defined by the 2D points `c,d`.
@@ -33,7 +31,6 @@ false
 switches_side(a, b, c, d) = is_ccw(a, b, c) ⊻ is_ccw(a, b, d)
 
 """
-
     intersection_distances(a, b, c, d)
 
 returns the solution to `a * (1-x1) + b * x1 == c * (1-x2) + d * x2`.
@@ -57,7 +54,6 @@ function intersection_distances(a, b, c, d)
 end
 
 """
-
     is_convex(polygon)
 
 tests if the exterior of the `GeoInterface` compatible `polygon` is convex.

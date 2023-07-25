@@ -16,8 +16,8 @@ struct ShadowObservatory
     tz::VariableTimeZone
 end
 
-"""
 
+"""
     local_sunpos(local_time::DateTime, obs::ShadowObservatory; cartesian::Bool=true)
 
 Calculates the position of the sun in the sky at time `local_time`, at the location specified by `obs`.
@@ -28,12 +28,12 @@ Uses `AstroLib` for all the heavy lifting.
 # Return
 if `cartesian==true`:
 
-Array with 3 entries [x,y,z], representing vector pointing towards sun in local, cartesian coordinate system, centered at `obs`
+Array with 3 entries `[x,y,z]`, representing vector pointing towards sun in local, cartesian coordinate system, centered at `obs`
 with x pointing east, y pointing north and z pointing up.
 
 otherwise:
 
-Array with 2 entries [altitude, azimuth] in degrees. `azimuth` measured east from north.
+Array with 2 entries `[altitude, azimuth]` in degrees. `azimuth` measured east from north.
 """
 function local_sunpos(local_time::DateTime, obs::ShadowObservatory; cartesian::Bool=true)
     utc_time = DateTime(ZonedDateTime(local_time, obs.tz), UTC)
