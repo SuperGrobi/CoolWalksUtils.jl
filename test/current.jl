@@ -35,9 +35,6 @@ using ArchGDAL
 
 using BenchmarkTools
 
-ps = [ArchGDAL.buffer(ArchGDAL.createpoint(rand(), rand()), 0.2) for i in 1:10]
+psf() = [apply_wsg_84!(ArchGDAL.buffer(ArchGDAL.createpoint(rand(), rand()), 0.2)) for i in 1:100]
 
-e1 = CoolWalksUtils.geoarray_extent()
-e2 = CoolWalksUtils.geoarray_extent(ps)
-
-CoolWalksUtils.extent_contains(e2, 1, 0.4)
+@benchmark project_local!(x, 55, 12) setup = (x = psf()[1])

@@ -1,57 +1,101 @@
 """
-    project_local!(geo_array, center_lon, center_lat)
+    crs_local(lon, lat)
 
-projects iterable of `ArchGDAL.jl` geometries from the coordinate system of `first(geo_array)`
-to the `transverse mercator` projection centered at `center_lon`, `center_lat`. Returns the projected `geo_array`.
+builds Transverse Mercator `ArchGDAL` coordinate reference system centered around `lon` and `lat`.
 """
-function project_local!(geo_array, center_lon, center_lat)
-    if length(geo_array) > 0
-        projstring = "+proj=tmerc +lon_0=$center_lon +lat_0=$center_lat"
-        src = ArchGDAL.getspatialref(first(geo_array))
-        dest = ArchGDAL.importPROJ4(projstring)
-        ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, dest)
-    end
-    return geo_array
+crs_local(lon, lat) = ArchGDAL.importPROJ4("+proj=tmerc +lon_0=$lon +lat_0=$lat")
+
+
+"""
+    _execute_projection!(geometry::ArchGDAL.IGeometry, src, dst)
+    _execute_projection!(geometry_array::AbstractArray, src, dst)
+
+Applies the transformation from `src` to `dst` to `geometry` or the elements of `geometry_array`.
+"""
+function _execute_projection!(geometry::ArchGDAL.IGeometry, src, dst)
+    ArchGDAL.createcoordtrans(trans -> ArchGDAL.transform!(geometry, trans), src, dst)
+    return geometry
 end
 
-"""
+function _execute_projection!(geometry_array::AbstractArray, src, dst)
+    ArchGDAL.createcoordtrans(src, dst) do trans
+        for g in geometry_array
+            ArchGDAL.transform!(g, trans)
+        end
+    end
+    return geometry_array
+end
 
-    project_local!(df::DataFrame, center_lon=metadata(df, "center_lon"), center_lat=metadata(df, "center_lat"))
 
-projects each colum of `df` where the first entry is `GeoInterface.geometry()` to the `transverse mercator` projection
-centered at `center_lon`, `center_lat`. Returns the projected `df`.
 """
-function project_local!(df::DataFrame, center_lon=metadata(df, "center_lon"), center_lat=metadata(df, "center_lat"))
+    project_local!(geometry_container, observatory::ShadowObservatory)
+    project_local!(df::DataFrame, observatory::ShadowObservatory=metadata(df, "observatory"))
+
+Projects geometry or containers of geometry to transverse mercator centered at `(lon, lat)` in `observatory`.
+
+In the case of arrays, we assume all the entries to be in the same `crs` as the first entry.
+For `DataFrames` each colum containing geometry (determined by `isgeometry(first(column))`) is assumed to be in the same `crs` as the first entry.
+
+Returns the passed geometry container.
+
+    project_local!(container, lon, lat)
+
+Same as above, but allows to specify the center of the projection via `lon` and `lat` in degrees.
+"""
+function project_local! end
+
+# dispatches to lon lat methods
+project_local!(geometry_container, observatory::ShadowObservatory) = project_local!(geometry_container, observatory.lon, observatory.lat)
+project_local!(df::DataFrame, observatory::ShadowObservatory=metadata(df, "observatory")) = project_local!(df, observatory.lon, observatory.lat)
+
+
+# lat lon versions
+function project_local!(geometry::ArchGDAL.IGeometry, lon, lat)
+    src = ArchGDAL.getspatialref(geometry)
+    dst = crs_local(lon, lat)
+    _execute_projection!(geometry, src, dst)
+    return geometry
+end
+
+function project_local!(df::DataFrame, lon, lat)
     if nrow(df) > 0
         for c in eachcol(df)
             if isgeometry(first(c))
-                project_local!(c, center_lon, center_lat)
+                # treat each column as its own vector
+                project_local!(c, lon, lat)
             end
         end
     end
     return df
 end
 
-"""
-    project_back!(geo_array)
-
-projects iterable of `ArchGDAL.jl` geometries from the coordinate system of `first(geo_array)`
-to the coordinate reference system given in `OSM_ref` (`EPSG4326`). Returns the projected `geo_array`.
-"""
-function project_back!(geo_array)
-    if length(geo_array) > 0
-        src = ArchGDAL.getspatialref(first(geo_array))
-        ArchGDAL.createcoordtrans(trans -> project_geo_array!(geo_array, trans), src, OSM_ref[])
+function project_local!(geometry_array::AbstractArray, lon, lat)
+    if length(geometry_array) > 0
+        src = ArchGDAL.getspatialref(first(geometry_array))
+        dst = crs_local(lon, lat)
+        _execute_projection!(geometry_array, src, dst)
     end
-    return geo_array
+    return geometry_array
 end
 
 """
+    project_back!(geometry_container)
 
-    project_back!(df::DataFrame)
-    
-projects each column of `df` where the first entry is `GeoInterface.geometry()` back to `OSM_ref[]`. Return the `df`.
+Projects geometry or containers of geometry from their respective local system back to `WSG84`.
+
+In the case of arrays, we assume all the entries to be in the same `crs` as the first entry.
+For `DataFrames` each colum containing geometry (`isgeometry(first(column))`) is assumed to be in the same `crs` as the first entry.
+
+Returns the passed in geometry container.
 """
+function project_back! end
+
+function project_back!(geometry::ArchGDAL.IGeometry)
+    src = ArchGDAL.getspatialref(geometry)
+    _execute_projection!(geometry, src, OSM_ref[])
+    return geometry
+end
+
 function project_back!(df::DataFrame)
     if nrow(df) > 0
         for c in eachcol(df)
@@ -63,33 +107,25 @@ function project_back!(df::DataFrame)
     return df
 end
 
-"""
-    project_geo_array!(geo_array, trans)
-
-applies the `ArchGDAL` transformation to every element in `geo_array`.
-"""
-function project_geo_array!(geo_array, trans)
-    for geom in geo_array
-        ArchGDAL.transform!(geom, trans)
+function project_back!(geometry_array::AbstractArray)
+    if length(geometry_array) > 0
+        src = ArchGDAL.getspatialref(first(geometry_array))
+        _execute_projection!(geometry_array, src, OSM_ref[])
     end
+    return geometry_array
 end
 
 """
-    reinterp_crs!(geom, crs)
+    reinterp_crs!(geometry_container, crs)
 
-reinterprets the coordinates of `ArchGDAL.jl` geometry `geom` to be in the
-coordinate reference system `crs`. Returns the reinterpreted `geom`.
+reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or `AbstractArray` of the same) to be in `crs`.
 """
-function reinterp_crs!(geom, crs)
-    ArchGDAL.createcoordtrans(crs, crs) do trans
-        ArchGDAL.transform!(geom, trans)
-    end
-    return geom
-end
+reinterp_crs!(geometry_container, crs) = _execute_projection!(geometry_container, crs, crs)
+
 
 """
-    apply_wsg_84!(geom)
+    apply_wsg_84!(geometry_container)
 
-reinterprets the coordinates of `ArchGDAL.jl` geometry `geom` to be in `OSM_ref` (`EPSG4326`). Returns the reinterpreted `geom`.
+reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or `AbstractArray` of the same) to be in `WSG84`.
 """
-apply_wsg_84!(geom) = reinterp_crs!(geom, OSM_ref[])
+apply_wsg_84!(geometry_container) = reinterp_crs!(geometry_container, OSM_ref[])

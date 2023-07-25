@@ -49,7 +49,5 @@ include("RTreeBuilding.jl")
 export @rerun
 include("Testing.jl")
 
-# TODO: Rework Projection
 # TODO: Rework RTreeBuilding
-# TODO: Rework Testing
 end
