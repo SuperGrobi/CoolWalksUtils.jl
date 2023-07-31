@@ -50,5 +50,4 @@ include("RTreeBuilding.jl")
 export @rerun
 include("Testing.jl")
 
-# TODO: Rework RTreeBuilding
 end
