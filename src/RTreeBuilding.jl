@@ -23,13 +23,13 @@ relevant values get precomputed and cashed in the prepared geometry, rather than
 
 The type of the `val` tuple is determined by the `eltype` of `geom_arr` and `data_arr`. For performance sake, make sure they are concrete.
 """
-function build_rtree(geom_arr, data=[nothing])
-    @assert length(data) in [1, length(geom_arr)] "data has to be the same length as geom_arr"
-    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep, :data),Tuple{eltype(geom_arr),ArchGDAL.IPreparedGeometry,eltype(data)}})
-    data = Iterators.cycle(data)
-    for (i, geom) in enumerate(geom_arr)
+function build_rtree(geom_arr, data_arr=[nothing])
+    @assert length(data_arr) in [1, length(geom_arr)] "data has to be the same length as geom_arr"
+    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep, :data),Tuple{eltype(geom_arr),ArchGDAL.IPreparedGeometry,eltype(data_arr)}})
+    for (i, (geom, data)) in enumerate(zip(geom_arr, Iterators.cycle(data_arr)))
         bbox = rect_from_geom(geom)
-        insert!(rt, bbox, i, (orig=geom, prep=ArchGDAL.preparegeom(geom), data=data[i]))
+
+        insert!(rt, bbox, i, (orig=geom, prep=ArchGDAL.preparegeom(geom), data=data))
     end
     return rt
 end
