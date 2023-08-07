@@ -202,6 +202,19 @@ end
     df_global = project_back!(df)
     @test df_global == df
 
+    set_observatory!(df, "pointobservatory", tz"Europe/London"; source=[:points])
+    setobs = metadata(df, "observatory")
+    @test setobs.name == "pointobservatory"
+    @test setobs.lon ≈ 2.25
+    @test setobs.lat ≈ 1.1
+
+    set_observatory!(df, "lineobservatory", tz"Europe/London"; source=[:lines])
+    setobs = metadata(df, "observatory")
+    @test setobs.name == "lineobservatory"
+    @test setobs.lon ≈ 1.0
+    @test setobs.lat ≈ 1.2
+
+
     metadata!(df, "observatory", ShadowObservatory("test obs", 1.3, 1.5, tz"Europe/London"), style=:note)
     df_local = project_local!(df)
     for geom in df.points

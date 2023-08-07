@@ -51,3 +51,18 @@ function local_sunpos(local_time::DateTime, obs::ShadowObservatory; cartesian::B
         return [x, y, z]
     end
 end
+
+
+"""
+    set_observatory!(df, name, timezone; source=[:lon, :lat])
+
+creates a `CoolWalksUtils.ShadowObservatory` and adds it to the metadata of `df`.
+uses the `source` column(s) to ge the `Extent` of the whole dataset.
+"""
+function set_observatory!(df, name, timezone; source=[:lon, :lat])
+    sourcecols = [df[:, i] for i in source]
+    center = extent_center(geoiter_extent(sourcecols...))
+    obs = ShadowObservatory(name, center.X, center.Y, timezone)
+    metadata!(df, "observatory", obs; style=:note)
+    return df
+end

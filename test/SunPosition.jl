@@ -46,3 +46,31 @@ end
     @test pos3[1] > 0
     @test pos3[2] ≈ 270 atol = 0.05
 end
+
+@testitem "set_observatory!" begin
+    using ArchGDAL, DataFrames, TimeZones
+
+    lon = [1.0, 1.6, 2.6, 5.0]
+    lat = [1.0, 1.2, 3.5, 5.2]
+
+    p1 = ArchGDAL.createpoint(lon[1], lat[1])
+    p2 = ArchGDAL.buffer(ArchGDAL.createpoint(lon[2], lat[2]), 1.4)
+    p3 = ArchGDAL.createpoint(lon[3], lat[3])
+    p4 = ArchGDAL.buffer(ArchGDAL.createpoint(lon[4], lat[4]), 0.3)
+    geometry = [p1, p2, p3, p4]
+
+    df = DataFrame(lon=lon, lat=lat, geometry=geometry)
+    set_observatory!(df, "latlonobs", tz"Europe/Berlin")
+    setobs = metadata(df, "observatory")
+
+    @test setobs.name == "latlonobs"
+    @test setobs.lon ≈ 3.0
+    @test setobs.lat ≈ 3.1
+
+    set_observatory!(df, "geomobs", tz"Europe/Berlin"; source=[:geometry])
+    setobs = metadata(df, "observatory")
+
+    @test setobs.name == "geomobs"
+    @test setobs.lon ≈ 2.75
+    @test setobs.lat ≈ 2.65
+end
