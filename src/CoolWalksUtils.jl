@@ -28,7 +28,7 @@ end
 
 export OSM_ref
 
-export local_sunpos, ShadowObservatory
+export local_sunpos, ShadowObservatory, set_observatory!
 include("SunPosition.jl")
 
 export project_local!,
@@ -38,7 +38,7 @@ export project_local!,
     in_local_coordinates
 include("Projection.jl")
 
-export geoiter_extent, extent_center, extent_contains
+export geoiter_extent, extent_center, extent_contains, apply_extent!
 include("Extents.jl")
 
 export is_ccw, intersection_distances, switches_side, is_convex, is_left

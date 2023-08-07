@@ -37,3 +37,22 @@ extent_contains(a::Extent, X, Y) = extent_contains(a, geoiter_extent(X, Y))
 Checks if the extent `b` is fully contained in extent `a`.
 """
 extent_contains(a::Extent, b::Extent) = Extents.union(a, b) == a
+
+"""
+    extent_contains(a::Extent, geometry)
+
+Checks if the `GeoInterface.extent` of `geometry` is fully contained in extent `a`.
+"""
+extent_contains(a::Extent, geometry) = extent_contains(a, GeoInterface.extent(geometry))
+
+"""
+    apply_extent!(df, extent; source=[:lon, :lat])
+
+trim `df` to only contain rows where `extent_contains(extent, source...)` is true.
+"""
+function apply_extent!(df, extent; source=[:lon, :lat])
+    # trim dataframe to given size
+    if extent !== nothing
+        filter!(source => (g...) -> extent_contains(extent, g...), df)
+    end
+end
