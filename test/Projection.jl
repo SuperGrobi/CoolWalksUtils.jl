@@ -28,8 +28,16 @@
     geom_reinterp = apply_wsg_84!(geomlist)
     @test geom_reinterp === geomlist
     @test repr(ArchGDAL.getspatialref(geomlist[1])) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
-end
 
+    # test application for generators
+    geomgenerator = (i for i in setup())
+    for geom in geomgenerator
+        @test repr(ArchGDAL.getspatialref(geom)) == "NULL Spatial Reference System"
+    end
+    geom_reinterp = apply_wsg_84!(geomgenerator)
+    @test geom_reinterp === geomgenerator
+    @test repr(ArchGDAL.getspatialref(first(geomgenerator))) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
+end
 
 
 @testitem "Project geometries" begin
@@ -174,6 +182,83 @@ end
     @test ArchGDAL.gety(line2, 1) == 1.0
 end
 
+
+@testitem "Project geometry generators" begin
+    using ArchGDAL, TimeZones
+
+    point1 = ArchGDAL.createpoint(1.0, 1.0)
+    point2 = ArchGDAL.createpoint(3.5, 1.2)
+    line1 = ArchGDAL.createlinestring([(0.0, 0.0), (1.0, 1.0), (2.0, 1.0)])
+    line2 = ArchGDAL.createlinestring([(1.0, 0.0), (1.0, 1.0), (0.0, 2.4)])
+
+    pointgen = (i for i in [point1, point2])
+    linegen = (i for i in [line1, line2])
+    geomgen = (i for i in [point1, point2, line1, line2])
+
+    obs = ShadowObservatory("test observatory", 1, 1, tz"Europe/London")
+
+    #local transformation needs a crs
+    try
+        project_local!(pointgen, obs)
+        @test false
+    catch
+        @test true
+    end
+
+    # empty list is trivially transformed
+    @test project_local!((i for i in []), obs) |> collect == []
+    @test project_back!((i for i in [])) |> collect == []
+
+    # test application of wsg84 (and apply wsg84)
+    for geom in geomgen
+        # check if crs is NULL
+        @test repr(ArchGDAL.getspatialref(geom)) == "NULL Spatial Reference System"
+        # apply wsg 84
+        geom_reinterp = apply_wsg_84!(geom)
+        @test geom_reinterp === geom
+        # test if new crs was applied
+        @test repr(ArchGDAL.getspatialref(geom)) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
+    end
+
+    local_pointgen = project_local!(pointgen, obs)
+    @test all(local_pointgen .=== pointgen)
+    local_linegen = project_local!(linegen, obs)
+    @test all(local_linegen .=== linegen)
+
+    for geom in geomgen
+        @test contains(repr(ArchGDAL.getspatialref(geom)), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
+    end
+
+    # check if (1.0, 1.0) => (0.0, 0.0)
+    @test ArchGDAL.getx(point1, 0) == 0.0
+    @test ArchGDAL.gety(point1, 0) == 0.0
+
+    @test ArchGDAL.getx(line1, 1) == 0.0
+    @test ArchGDAL.gety(line1, 1) == 0.0
+
+    @test ArchGDAL.getx(line2, 1) == 0.0
+    @test ArchGDAL.gety(line2, 1) == 0.0
+
+    global_geomgen = project_back!(geomgen)
+    @test all(global_geomgen .=== geomgen)
+
+    for geom in geomgen
+        # test if default crs was applied
+        @test repr(ArchGDAL.getspatialref(geom)) == "Spatial Reference System: +proj=longlat +datum=WGS84 +no_defs"
+    end
+
+    # check if (0.0, 0.0) => (1.0, 1.0)
+    @test ArchGDAL.getx(point1, 0) == 1.0
+    @test ArchGDAL.gety(point1, 0) == 1.0
+
+    @test ArchGDAL.getx(line1, 1) == 1.0
+    @test ArchGDAL.gety(line1, 1) == 1.0
+
+    @test ArchGDAL.getx(line2, 1) == 1.0
+    @test ArchGDAL.gety(line2, 1) == 1.0
+end
+
+
 @testitem "Project dataframes" begin
     using ArchGDAL, DataFrames, TimeZones
     point1 = ArchGDAL.createpoint(1.0, 1.0)
@@ -262,6 +347,15 @@ end
     geom_reinterp = reinterp_crs!(geomlist, dst)
     @test geom_reinterp === geomlist
     @test contains(repr(ArchGDAL.getspatialref(geomlist[1])), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
+
+    # test application for generators
+    geomgenerator = (i for i in setup())
+    for geom in geomgenerator
+        @test repr(ArchGDAL.getspatialref(geom)) == "NULL Spatial Reference System"
+    end
+    geom_reinterp = reinterp_crs!(geomgenerator, dst)
+    @test geom_reinterp === geomgenerator
+    @test contains(repr(ArchGDAL.getspatialref(first(geomgenerator))), "Spatial Reference System: +proj=tmerc +lat_0=1 +lon_0=1")
 end
 
 @testitem "in local coordinates" begin

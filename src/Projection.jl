@@ -8,22 +8,22 @@ crs_local(lon, lat) = ArchGDAL.importPROJ4("+proj=tmerc +lon_0=$lon +lat_0=$lat"
 
 """
     _execute_projection!(geometry::ArchGDAL.IGeometry, src, dst)
-    _execute_projection!(geometry_array::AbstractArray, src, dst)
+    _execute_projection!(geometry_iterable, src, dst)
 
-Applies the transformation from `src` to `dst` to `geometry` or the elements of `geometry_array`.
+Applies the transformation from `src` to `dst` to `geometry` or the elements of `geometry_iterable`.
 """
 function _execute_projection!(geometry::ArchGDAL.IGeometry, src, dst)
     ArchGDAL.createcoordtrans(trans -> ArchGDAL.transform!(geometry, trans), src, dst)
     return geometry
 end
 
-function _execute_projection!(geometry_array::AbstractArray, src, dst)
+function _execute_projection!(geometry_iterable, src, dst)
     ArchGDAL.createcoordtrans(src, dst) do trans
-        for g in geometry_array
+        for g in geometry_iterable
             ArchGDAL.transform!(g, trans)
         end
     end
-    return geometry_array
+    return geometry_iterable
 end
 
 
@@ -31,9 +31,9 @@ end
     project_local!(geometry_container, observatory::ShadowObservatory)
     project_local!(df::DataFrame, observatory::ShadowObservatory=metadata(df, "observatory"))
 
-Projects geometry or containers of geometry to transverse mercator centered at `(lon, lat)` in `observatory`.
+Projects geometry or containers of geometry (iterables) to transverse mercator centered at `(lon, lat)` in `observatory`.
 
-In the case of arrays, we assume all the entries to be in the same `crs` as the first entry.
+In the case of iterables, we assume all the entries to be in the same `crs` as the first entry.
 For `DataFrames` each colum containing geometry (determined by `isgeometry(first(column))`) is assumed to be in the same `crs` as the first entry.
 
 Returns the passed geometry container.
@@ -69,21 +69,21 @@ function project_local!(df::DataFrame, lon, lat)
     return df
 end
 
-function project_local!(geometry_array::AbstractArray, lon, lat)
-    if length(geometry_array) > 0
-        src = ArchGDAL.getspatialref(first(geometry_array))
+function project_local!(geometry_iterable, lon, lat)
+    if !isempty(geometry_iterable)
+        src = ArchGDAL.getspatialref(first(geometry_iterable))
         dst = crs_local(lon, lat)
-        _execute_projection!(geometry_array, src, dst)
+        _execute_projection!(geometry_iterable, src, dst)
     end
-    return geometry_array
+    return geometry_iterable
 end
 
 """
     project_back!(geometry_container)
 
-Projects geometry or containers of geometry from their respective local system back to `WSG84`.
+Projects geometry or containers of geometry (iterables) from their respective local system back to `WSG84`.
 
-In the case of arrays, we assume all the entries to be in the same `crs` as the first entry.
+In the case of iterables, we assume all the entries to be in the same `crs` as the first entry.
 For `DataFrames` each colum containing geometry (`isgeometry(first(column))`) is assumed to be in the same `crs` as the first entry.
 
 Returns the passed in geometry container.
@@ -107,18 +107,18 @@ function project_back!(df::DataFrame)
     return df
 end
 
-function project_back!(geometry_array::AbstractArray)
-    if length(geometry_array) > 0
-        src = ArchGDAL.getspatialref(first(geometry_array))
-        _execute_projection!(geometry_array, src, OSM_ref[])
+function project_back!(geometry_iterable)
+    if !isempty(geometry_iterable)
+        src = ArchGDAL.getspatialref(first(geometry_iterable))
+        _execute_projection!(geometry_iterable, src, OSM_ref[])
     end
-    return geometry_array
+    return geometry_iterable
 end
 
 """
     reinterp_crs!(geometry_container, crs)
 
-reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or `AbstractArray` of the same) to be in `crs`.
+reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or some iterable of the same) to be in `crs`.
 """
 reinterp_crs!(geometry_container, crs) = _execute_projection!(geometry_container, crs, crs)
 
@@ -126,7 +126,7 @@ reinterp_crs!(geometry_container, crs) = _execute_projection!(geometry_container
 """
     apply_wsg_84!(geometry_container)
 
-reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or `AbstractArray` of the same) to be in `WSG84`.
+reinterprets the coordinates of `geometry_container` (either `ArchGDAL.IGeometry` or some iterable of the same) to be in `WSG84`.
 """
 apply_wsg_84!(geometry_container) = reinterp_crs!(geometry_container, OSM_ref[])
 
