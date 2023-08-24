@@ -1,10 +1,19 @@
 module CoolWalksUtils
 
-using ArchGDAL
-using Dates
-using SpatialIndexing
+using StatsBase
+using LinearAlgebra
+
 using GeoInterface
+using Extents
+
+using ArchGDAL
+using SpatialIndexing
 using DataFrames
+
+using AstroLib
+using Dates
+using TimeZones
+
 
 """
 Reference which holds the WSG84 (EPSG4326) `ArchGDAL` Spatial Reference System
@@ -17,28 +26,22 @@ function __init__()
     nothing
 end
 
-#=
-    toWKT(geom::ArchGDAL.AbstractPreparedGeometry)
-
-temporary function to prevent segfault when trying to print prepared geometry
-=#
-ArchGDAL.toWKT(geom::ArchGDAL.AbstractPreparedGeometry) = "PreparedGeometry"
-
 export OSM_ref
 
-export sunposition, sunposition_deg, is_daylight_saving
+export local_sunpos, ShadowObservatory, set_observatory!
 include("SunPosition.jl")
 
 export project_local!,
     project_back!,
     reinterp_crs!,
-    apply_wsg_84!
+    apply_wsg_84!,
+    in_local_coordinates
 include("Projection.jl")
 
-export BoundingBox, in_BoundingBox, center_BoundingBox
-include("BoundingBox.jl")
+export geoiter_extent, extent_center, extent_contains, apply_extent!
+include("Extents.jl")
 
-export unit, cross, is_ccw, intersection_distance, switches_side, is_convex, is_left
+export is_ccw, intersection_distances, switches_side, is_convex, is_left
 include("Maths.jl")
 
 export build_rtree, rect_from_geom, build_point_rtree
@@ -47,7 +50,4 @@ include("RTreeBuilding.jl")
 export @rerun
 include("Testing.jl")
 
-# TODO: convex hull for dataframes and graphs
-# TODO: polygon to coordstring?
-# TODO: spatial dataset-intersections
 end

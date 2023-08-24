@@ -1,8 +1,8 @@
 """
     rect_from_geom(geom; buffer=0.0)
 
-builds `SpatialIndexing.Rect` with the extent of the geometry `geom` and a `buffer` of `buffer` added to each edge of the `Rect`. This is for example
-useful when we want to query around points, since them having a zero area extend might mess with numerical stuff.
+builds `SpatialIndexing.Rect` with the extent of the geometry `geom` and a `buffer` of `buffer` added to each edge of the `Rect`.
+Ideally, `SpatialIndexing.jl` would integrate with `GeoInterface.jl` or at least `Extents.jl`, making this function obsolete.
 """
 function rect_from_geom(geom; buffer=0.0)
     extent = GeoInterface.extent(geom)
@@ -13,61 +13,38 @@ function rect_from_geom(geom; buffer=0.0)
 end
 
 """
-    build_rtree(geo_arr)
+    build_rtree(geom_arr::AbstractArray, data_arr=[nothing])
 
-builds `SpatialIndexing.RTree{Float64, 2}` from an array containing `ArchGDAL.wkbPolygon`s. The value of an entry in the RTree is a named tuple with:
-`(orig=original_geometry,prep=prepared_geometry)`. `orig` is just the original object, an element from `geo_arr`, where `prep` is the prepared geometry,
+builds `SpatialIndexing.RTree{Float64, 2}` from an array containing `ArchGDAL.IGeometry`s. The value of an entry in the RTree is a named tuple with:
+`(orig=original_geometry,prep=prepared_geometry, data=data_entry)`. `orig` is the original object, an element from `geom_arr`. `prep` is the prepared geometry,
 derived from `orig`. The latter one can be used in a few `ArchGDAL` functions to get higher performance, for example in intersection testing, because
-relevant values get precomputed and cashed in the prepared geometry, rather than precomputed on every test.
+relevant values get precomputed and cashed in the prepared geometry, rather than recomputed on every test. `data` holds the entry in `data_arr` at the index of
+`orig` in `geom_arr`.
+
+The type of the `val` tuple is determined by the `eltype` of `geom_arr` and `data_arr`. For performance sake, make sure they are concrete.
 """
-function build_rtree(geo_arr)
-    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep),Tuple{ArchGDAL.IGeometry{ArchGDAL.wkbPolygon},ArchGDAL.IPreparedGeometry}})
-    for (i, geom) in enumerate(geo_arr)
+function build_rtree(geom_arr::AbstractArray, data_arr=[nothing])
+    @assert length(data_arr) in [1, length(geom_arr)] "data has to be the same length as geom_arr"
+    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep, :data),Tuple{eltype(geom_arr),ArchGDAL.IPreparedGeometry,eltype(data_arr)}})
+    for (i, (geom, data)) in enumerate(zip(geom_arr, Iterators.cycle(data_arr)))
         bbox = rect_from_geom(geom)
-        insert!(rt, bbox, i, (orig=geom, prep=ArchGDAL.preparegeom(geom)))
+
+        insert!(rt, bbox, i, (orig=geom, prep=ArchGDAL.preparegeom(geom), data=data))
     end
     return rt
 end
 
 """
-
     build_rtree(df::DataFrame)
 
 builds `SpatialIndexing.RTree{Float64, 2}` from a `DataFrame` containing at least a column named `geometry`. The value of an entry in the RTree is a named tuple with:
-`(orig=original_geometry, prep=prepared_geometry, row=dataframe_row)`. `orig` is the same geometry as in `row.geometry`, and `prep` is the prepared geometry, derived from `orig`.
+`(orig=original_geometry, prep=prepared_geometry, data=dataframe_row)`. `orig` is the same geometry as in `row.geometry`, and `prep` is the prepared geometry, derived from `orig`.
 It can be used in a few `ArchGDAL` functions to get higher performance, for example in intersection testing, because relevant values get precomputed and
-cashed in the prepared geometry, rather than precomputed on every test. Note that only the first element in these tests can be a prepared geometry,
-for example `ArchGDAL.intersects(normal_geom, prepared_geom)` is a highway to segfault-town, where `ArchGDAL.intersects(prepared_geom, normal_geom)` is fine and great.
-The `row` entry is a reference to the row of the original dataframe, providing access to all relevant data.
-"""
-function build_rtree(df::DataFrame)
-    rt = RTree{Float64,2}(Int, NamedTuple{(:orig, :prep, :row),Tuple{ArchGDAL.IGeometry,ArchGDAL.IPreparedGeometry,DataFrames.DataFrameRow}})
-    for (i, r) in enumerate(eachrow(df))
-        bbox = rect_from_geom(r.geometry)
-        insert!(rt, bbox, i, (orig=r.geometry, prep=ArchGDAL.preparegeom(r.geometry), row=r))
-    end
-    return rt
-end
+cashed in the prepared geometry, rather than recomputed on every test.
 
-"""
+Note that only the first element in these tests can be a prepared geometry, for example `ArchGDAL.intersects(normal_geom, prepared_geom)`
+is a highway to segfault-town, while `ArchGDAL.intersects(prepared_geom, normal_geom)` is fine and great.
 
-    build_point_rtree(points, data, include_orig_point=false)
-
-builds `SpatialIndexing.RTree{Float64, 2}` from an array containing `ArchGDAL.wkbPoint`s. If `include_orig_point` is false, the `val` of an entry in the tree
-is just the corresponding element in the `data` array. If `include_orig_point` is true, it will be a `NamedTuple` with keys of `:data` and `:pointgeom`.
+The `data` entry is a reference to the row of the original dataframe `df`, providing access to all relevant data.
 """
-function build_point_rtree(points, data, include_orig_point=false)
-    valtype = include_orig_point ? NamedTuple{(:data, :pointgeom),Tuple{eltype(data),eltype(points)}} : eltype(data)
-    rt = RTree{Float64,2}(Int, valtype)
-    for (id, (point, datum)) in enumerate(zip(points, data))
-        x = ArchGDAL.getx(point, 0)
-        y = ArchGDAL.gety(point, 0)
-        if include_orig_point
-            attached_data = (data=datum, pointgeom=point)
-        else
-            attached_data = datum
-        end
-        insert!(rt, SpatialIndexing.Rect((x, y), (x, y)), id, attached_data)
-    end
-    return rt
-end
+build_rtree(df::DataFrame) = build_rtree(df.geometry, eachrow(df))
