@@ -18,6 +18,7 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
 ArchGDAL = "0.10"
+DataFrames = "1"
 GeoInterface = "1"
 SpatialIndexing = "0.1"
 julia = "1.9"
