@@ -1,6 +1,7 @@
 # RTree Building
 ## Introduction
-Utilities to build `SpatialIndexing` RTrees out of `ArchGDAL` geometries or dataframes containing such.
+Utilities to build `SpatialIndexing` RTrees out of `ArchGDAL` geometries or
+dataframes containing such.
 
 ## API
 

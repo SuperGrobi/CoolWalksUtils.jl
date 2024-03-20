@@ -1,6 +1,6 @@
 # Maths
 ## Introduction
-These are just a few, geometry related maths functions used all over the place.
+These are just a few, geometry related maths functions used everywhere.
 
 ## API
 
